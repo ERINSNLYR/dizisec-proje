@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <title>DİZİSEÇ</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <video autoplay muted loop playsinline class="bg-video">
+    <source src="video/background.mp4" type="video/mp4">
+  </video>
+
+  <div class="overlay"></div>
+
+  <div class="container">   
+    <p class="subtitle">Sevdiğin film veya diziyi yaz, benzerlerini önerelim</p>
+
+    <div class="categories">
+      <button class="active" onclick="filterByCategory('ALL', this)">Tümü</button>
+      <button onclick="filterByCategory('Sci-Fi', this)">Sci-Fi</button>
+      <button onclick="filterByCategory('Drama', this)">Drama</button>
+      <button onclick="filterByCategory('Thriller', this)">Thriller</button>
+      <button onclick="filterByCategory('Crime', this)">Crime</button>
+      <button onclick="filterByCategory('Mystery', this)">Mystery</button>
+      <button class="fav-category-btn" onclick="showFavorites(this)">Favoriler</button>
+      
+      <button onclick="document.getElementById('authModal').style.display='flex'" style="background: #e50914; color: white; margin-left: 20px;">Giriş Yap</button>
+      <button onclick="cikisYap()" style="background: #333; color: white; margin-left: 10px;">Çıkış Yap</button>
+    </div>
+
+    <div class="search-box">
+      <input 
+        type="text" 
+        id="searchInput" 
+        placeholder="Örn: Inception"
+        onkeydown="if(event.key==='Enter') searchTMDB()">
+      <button onclick="searchTMDB()">Öner</button>
+    </div>
+
+    <div id="results" class="results"></div>
+  </div>
+
+  <div id="popup" class="popup">
+    <div class="popup-content">
+      <span class="close" onclick="closePopup()">×</span>
+      <h2 id="popupTitle"></h2>
+      <p id="popupInfo"></p>
+    </div>
+  </div>
+
+  <div id="authModal" class="popup" style="display: none; z-index: 1000;">
+    <div style="background: #111; padding: 30px; border-radius: 10px; text-align: center; width: 300px; border: 1px solid #333;">
+      <h2 style="margin-bottom: 15px;">Giriş Yap</h2>
+      <input type="text" id="usernameInput" placeholder="Kullanıcı Adı" style="width: 100%; padding: 10px; margin-bottom: 10px; border-radius: 5px; border: none; background: #222; color: white;">
+      <input type="password" id="passwordInput" placeholder="Şifre" style="width: 100%; padding: 10px; margin-bottom: 15px; border-radius: 5px; border: none; background: #222; color: white;">
+      <button onclick="girisYap()" style="background: #e50914; color: white; padding: 10px; width: 100%; border: none; border-radius: 5px; cursor: pointer; margin-bottom: 10px;">Giriş Yap</button>
+      <button onclick="kayitOl()" style="background: #333; color: white; padding: 10px; width: 100%; border: none; border-radius: 5px; cursor: pointer;">Yeni Kayıt Ol</button>
+      <button onclick="document.getElementById('authModal').style.display='none'" style="background: transparent; color: gray; margin-top: 15px; border: none; cursor: pointer;">Kapat</button>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
