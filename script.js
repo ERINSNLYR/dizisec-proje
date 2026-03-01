@@ -3,6 +3,7 @@ console.log("%cDESIGNED BY SAMET ACAR", "color: #ff4757; font-size: 20px; font-w
 const API_KEY = "a561c1baca23a6be5680b3eaf4930018";
 const BASE_URL = "https://api.themoviedb.org/3";
 const IMG_URL = "https://image.tmdb.org/t/p/w500";
+const BACKEND_URL = "https://dizisec-proje.onrender.com";
 
 const results = document.getElementById("results");
 const searchInput = document.getElementById("searchInput");
@@ -11,14 +12,14 @@ let activeCategory = "ALL";
 let favorites = [];
 let currentUser = localStorage.getItem('userId') || null;
 
-// 💾 BAŞLANGIÇTA VE GİRİŞ YAPILDIĞINDA FAVORİLERİ ÇEK
+// BAŞLANGIÇTA VE GİRİŞ YAPILDIĞINDA FAVORİLERİ ÇEK
 async function loadFavorites() {
   if (!currentUser) {
     favorites = [];
     return;
   }
   try {
-    const res = await fetch(`http://localhost:3000/api/favoriler?userId=${currentUser}`);
+    const res = await fetch(`${BACKEND_URL}/api/favoriler?userId=${currentUser}`);
     favorites = await res.json();
   } catch (err) {
     console.error("Backend'e bağlanılamadı.");
@@ -129,7 +130,7 @@ function closePopup() {
   if(popupVideo) popupVideo.innerHTML = ""; 
 }
 
-// 🌐 BACKEND İLE HABERLEŞEN KİŞİYE ÖZEL FAVORİ EKLEME
+// BACKEND İLE HABERLEŞEN KİŞİYE ÖZEL FAVORİ EKLEME
 async function toggleFavorite(event, item, mediaType) {
   event.stopPropagation(); 
   
@@ -142,7 +143,7 @@ async function toggleFavorite(event, item, mediaType) {
   const itemToSave = { ...item, mediaType: mediaType };
 
   try {
-    const res = await fetch('http://localhost:3000/api/favoriler', {
+    const res = await fetch(`${BACKEND_URL}/api/favoriler`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ item: itemToSave, userId: currentUser })
@@ -218,7 +219,7 @@ async function kayitOl() {
   const username = document.getElementById("usernameInput").value;
   const password = document.getElementById("passwordInput").value;
 
-  const res = await fetch('http://localhost:3000/api/kayit', {
+  const res = await fetch(`${BACKEND_URL}/api/kayit`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ username, password })
@@ -231,7 +232,7 @@ async function girisYap() {
   const username = document.getElementById("usernameInput").value;
   const password = document.getElementById("passwordInput").value;
 
-  const res = await fetch('http://localhost:3000/api/giris', {
+  const res = await fetch(`${BACKEND_URL}/api/giris`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ username, password })
@@ -243,7 +244,7 @@ async function girisYap() {
     localStorage.setItem('userId', data.userId);
     currentUser = data.userId;
     document.getElementById('authModal').style.display = 'none';
-    loadFavorites(); // Giriş yapınca favorileri hemen yükle
+    loadFavorites(); 
   } else {
     alert(data.hata);
   }
@@ -254,5 +255,5 @@ function cikisYap() {
   currentUser = null;
   favorites = [];
   alert("Başarıyla çıkış yapıldı!");
-  location.reload(); // Sayfayı sıfırlar
+  location.reload(); 
 }
