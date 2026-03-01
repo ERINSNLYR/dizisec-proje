@@ -7,13 +7,17 @@
 </head>
 <body>
 
-  <video autoplay muted loop playsinline class="bg-video">
-    <source src="video/background.mp4" type="video/mp4">
-  </video>
+  <div id="loginScreen" style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; width: 100%; z-index: 10;">
+    <div style="background: rgba(0, 0, 0, 0.7); padding: 40px; border-radius: 10px; text-align: center; width: 350px; box-shadow: 0 0 20px rgba(255, 71, 87, 0.4); border: 1px solid rgba(255,255,255,0.1);">
+      <h1 style="color: #ff4757; margin-bottom: 25px; font-size: 32px; font-weight: bold; letter-spacing: 2px;">DİZİSEÇ</h1>
+      <input type="text" id="usernameInput" placeholder="Kullanıcı Adı" style="width: 100%; padding: 12px; margin-bottom: 15px; border-radius: 5px; border: none; background: #333; color: white; outline: none;">
+      <input type="password" id="passwordInput" placeholder="Şifre" style="width: 100%; padding: 12px; margin-bottom: 25px; border-radius: 5px; border: none; background: #333; color: white; outline: none;">
+      <button onclick="girisYap()" style="background: #ff4757; color: white; padding: 12px; width: 100%; border: none; border-radius: 5px; cursor: pointer; margin-bottom: 15px; font-weight: bold; font-size: 16px; transition: 0.3s;">Giriş Yap</button>
+      <button onclick="kayitOl()" style="background: transparent; color: #ff4757; padding: 10px; width: 100%; border: 1px solid #ff4757; border-radius: 5px; cursor: pointer; font-weight: bold; transition: 0.3s;">Yeni Kayıt Ol</button>
+    </div>
+  </div>
 
-  <div class="overlay"></div>
-
-  <div class="container">   
+  <div id="mainApp" class="container" style="display: none;">   
     <p class="subtitle">Sevdiğin film veya diziyi yaz, benzerlerini önerelim</p>
 
     <div class="categories">
@@ -25,8 +29,7 @@
       <button onclick="filterByCategory('Mystery', this)">Mystery</button>
       <button class="fav-category-btn" onclick="showFavorites(this)">Favoriler</button>
       
-      <button onclick="document.getElementById('authModal').style.display='flex'" style="background: #e50914; color: white; margin-left: 20px;">Giriş Yap</button>
-      <button onclick="cikisYap()" style="background: #333; color: white; margin-left: 10px;">Çıkış Yap</button>
+      <button onclick="cikisYap()" style="background: #333; color: white; margin-left: auto;">Çıkış Yap</button>
     </div>
 
     <div class="search-box">
@@ -34,11 +37,13 @@
         type="text" 
         id="searchInput" 
         placeholder="Örn: Inception"
-        onkeydown="if(event.key==='Enter') searchTMDB()">
+        oninput="canliArama()">
       <button onclick="searchTMDB()">Öner</button>
     </div>
 
     <div id="results" class="results"></div>
+    <button id="loadMoreBtn" onclick="dahaFazlaYukle()" style="display: none; margin: 30px auto; padding: 12px 25px; background: #ff4757; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 16px; transition: 0.3s;">Daha Fazla Yükle</button>
+    
   </div>
 
   <div id="popup" class="popup">
@@ -49,17 +54,6 @@
     </div>
   </div>
 
-  <div id="authModal" class="popup" style="display: none; z-index: 1000;">
-    <div style="background: #111; padding: 30px; border-radius: 10px; text-align: center; width: 300px; border: 1px solid #333;">
-      <h2 style="margin-bottom: 15px;">Giriş Yap</h2>
-      <input type="text" id="usernameInput" placeholder="Kullanıcı Adı" style="width: 100%; padding: 10px; margin-bottom: 10px; border-radius: 5px; border: none; background: #222; color: white;">
-      <input type="password" id="passwordInput" placeholder="Şifre" style="width: 100%; padding: 10px; margin-bottom: 15px; border-radius: 5px; border: none; background: #222; color: white;">
-      <button onclick="girisYap()" style="background: #e50914; color: white; padding: 10px; width: 100%; border: none; border-radius: 5px; cursor: pointer; margin-bottom: 10px;">Giriş Yap</button>
-      <button onclick="kayitOl()" style="background: #333; color: white; padding: 10px; width: 100%; border: none; border-radius: 5px; cursor: pointer;">Yeni Kayıt Ol</button>
-      <button onclick="document.getElementById('authModal').style.display='none'" style="background: transparent; color: gray; margin-top: 15px; border: none; cursor: pointer;">Kapat</button>
-    </div>
-  </div>
-
-  <script src="script.js"></script>
+  <script src="script.js"></script> 
 </body>
 </html>

@@ -12,6 +12,10 @@ let activeCategory = "ALL";
 let favorites = [];
 let currentUser = localStorage.getItem('userId') || null;
 
+// SAYFALAMA İÇİN YENİ DEĞİŞKENLER
+let currentPage = 1;
+let currentMode = 'trending'; 
+
 // BAŞLANGIÇTA VE GİRİŞ YAPILDIĞINDA FAVORİLERİ ÇEK
 async function loadFavorites() {
   if (!currentUser) {
@@ -29,35 +33,60 @@ loadFavorites();
 
 const GENRES = { ALL: null, Drama: 18, Thriller: 53, Mystery: 9648, Crime: 80, "Sci-Fi": 878 };
 
-async function searchTMDB() {
+let aramaZamanlayici = null;
+
+function canliArama() {
+  clearTimeout(aramaZamanlayici);
+  const kelime = document.getElementById("searchInput").value.trim();
+
+  if (kelime.length === 0) {
+    loadTrending(1);
+    return;
+  }
+
+  if (kelime.length < 3) return;
+
+  aramaZamanlayici = setTimeout(() => {
+    searchTMDB(1);
+  }, 500);
+}
+
+// ARAMA SİSTEMİ (Sayfalamaya Uygun Hale Getirildi)
+async function searchTMDB(page = 1) {
   const query = searchInput.value.trim();
   if (!query) return;
 
-  results.innerHTML = "<p style='width:100%; text-align:center;'>Yükleniyor...</p>";
+  currentMode = 'search';
+  currentPage = page;
+
+  if (page === 1) results.innerHTML = "<p style='width:100%; text-align:center;'>Yükleniyor...</p>";
 
   try {
-    const searchRes = await fetch(`${BASE_URL}/search/multi?api_key=${API_KEY}&language=tr-TR&query=${query}`);
+    const searchRes = await fetch(`${BASE_URL}/search/multi?api_key=${API_KEY}&language=tr-TR&query=${query}&page=${page}`);
     const searchData = await searchRes.json();
 
-    if (searchData.results.length === 0) {
+    if (searchData.results.length === 0 && page === 1) {
       results.innerHTML = "<p style='width:100%; text-align:center;'>Maalesef sonuç bulunamadı.</p>";
+      butonGizleGoster(false);
       return;
     }
 
-    const mainItem = searchData.results[0];
-    const mediaType = mainItem.media_type || (mainItem.name ? 'tv' : 'movie'); 
+    if (page === 1) {
+      document.querySelector(".subtitle").innerHTML = "<b>Arama Sonuçları 🔍</b>";
+      results.innerHTML = ""; 
+    }
 
-    const similarRes = await fetch(`${BASE_URL}/${mediaType}/${mainItem.id}/similar?api_key=${API_KEY}&language=tr-TR`);
-    const similarData = await similarRes.json();
+    showResults(searchData.results, "movie", page === 1);
+    butonGizleGoster(searchData.page < searchData.total_pages);
 
-    showResults([mainItem, ...similarData.results], mediaType);
   } catch (error) {
-    results.innerHTML = "<p style='width:100%; text-align:center;'>Bir hata oluştu.</p>";
+    if (page === 1) results.innerHTML = "<p style='width:100%; text-align:center;'>Bir hata oluştu.</p>";
   }
 }
 
-function showResults(items, baseMediaType = "movie") {
-  results.innerHTML = "";
+// SONUÇLARI GÖSTER (Eskilerini silmeden yenilerini ekler)
+function showResults(items, baseMediaType = "movie", temizle = true) {
+  if (temizle) results.innerHTML = "";
 
   items.forEach(item => {
     if (!item.poster_path) return;
@@ -97,7 +126,14 @@ function filterByCategory(category, button) {
   activeCategory = category;
   document.querySelectorAll(".categories button").forEach(btn => btn.classList.remove("active"));
   button.classList.add("active");
-  searchTMDB();
+
+  const aramaKutusu = document.getElementById("searchInput").value.trim();
+  
+  if (aramaKutusu === "") {
+    loadTrending(1); 
+  } else {
+    searchTMDB(1); 
+  }
 }
 
 async function openPopup(id, mediaType, title, info) {
@@ -130,7 +166,7 @@ function closePopup() {
   if(popupVideo) popupVideo.innerHTML = ""; 
 }
 
-// BACKEND İLE HABERLEŞEN KİŞİYE ÖZEL FAVORİ EKLEME
+// FAVORİ EKLE/ÇIKAR
 async function toggleFavorite(event, item, mediaType) {
   event.stopPropagation(); 
   
@@ -170,6 +206,7 @@ function showFavorites(button) {
   activeCategory = "FAVORITES";
   document.querySelectorAll(".categories button").forEach(btn => btn.classList.remove("active"));
   if(button) button.classList.add("active");
+  butonGizleGoster(false); // Favorilerde daha fazla yükle butonu gizlenir
 
   if (!currentUser) {
     results.innerHTML = "<p style='width:100%; text-align:center;'>Favorilerini görmek için giriş yapmalısın!</p>";
@@ -180,10 +217,47 @@ function showFavorites(button) {
     results.innerHTML = "<p style='width:100%; text-align:center;'>Henüz favorilere eklediğin bir içerik yok.</p>";
     return;
   }
-  showResults(favorites);
+  showResults(favorites, "movie", true);
 }
 
-// SOL MENÜ İŞLEMLERİ
+// DAHA FAZLA YÜKLE SİSTEMİ
+function dahaFazlaYukle() {
+  if (currentMode === 'trending') {
+    loadTrending(currentPage + 1);
+  } else if (currentMode === 'search') {
+    searchTMDB(currentPage + 1);
+  }
+}
+
+function butonGizleGoster(goster) {
+  const btn = document.getElementById("loadMoreBtn");
+  if (btn) btn.style.display = goster ? "block" : "none";
+}
+
+// TRENDLER (Sayfalamaya Uygun Hale Getirildi)
+async function loadTrending(page = 1) {
+  currentMode = 'trending';
+  currentPage = page;
+
+  if(page === 1) results.innerHTML = "<p style='width:100%; text-align:center;'>Trendler yükleniyor...</p>";
+  
+  try {
+    const res = await fetch(`${BASE_URL}/trending/all/week?api_key=${API_KEY}&language=tr-TR&page=${page}`);
+    const data = await res.json();
+    
+    if (page === 1) {
+      document.querySelector(".subtitle").innerHTML = "<b>Haftanın En Popüler İçerikleri 🔥</b>";
+      results.innerHTML = ""; 
+    }
+    
+    showResults(data.results, "movie", page === 1);
+    butonGizleGoster(data.page < data.total_pages);
+  } catch (error) {
+    if (page === 1) results.innerHTML = "";
+  }
+}
+
+// SOL MENÜ İŞLEMLERİ (Kullanmıyorsan silebilirsin)
 function openSidebar() {
   document.getElementById("sidebar").classList.add("active");
   if (document.getElementById("trendingList").innerHTML.trim() === "") getTrendingWeek();
@@ -240,11 +314,14 @@ async function girisYap() {
   const data = await res.json();
 
   if (data.userId) {
-    alert("Hoş geldin " + data.username + "!");
     localStorage.setItem('userId', data.userId);
     currentUser = data.userId;
-    document.getElementById('authModal').style.display = 'none';
+    
+    document.getElementById("loginScreen").style.display = "none";
+    document.getElementById("mainApp").style.display = "block";
+    
     loadFavorites(); 
+    loadTrending(1);
   } else {
     alert(data.hata);
   }
@@ -254,6 +331,20 @@ function cikisYap() {
   localStorage.removeItem('userId');
   currentUser = null;
   favorites = [];
-  alert("Başarıyla çıkış yapıldı!");
-  location.reload(); 
+  
+  document.getElementById("mainApp").style.display = "none";
+  document.getElementById("loginScreen").style.display = "flex";
+  
+  document.getElementById("usernameInput").value = "";
+  document.getElementById("passwordInput").value = "";
+}
+
+// SAYFA İLK AÇILDIĞINDA OTURUM KONTROLÜ
+if (currentUser) {
+  document.getElementById("loginScreen").style.display = "none";
+  document.getElementById("mainApp").style.display = "block";
+  loadTrending(1);
+} else {
+  document.getElementById("loginScreen").style.display = "flex";
+  document.getElementById("mainApp").style.display = "none";
 }
