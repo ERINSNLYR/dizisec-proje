@@ -15,6 +15,7 @@ mongoose.connect(MONGO_URI)
   .then(() => console.log("MongoDB'ye başarıyla bağlandı! 🚀"))
   .catch(err => console.log("MongoDB Bağlantı hatası:", err));
 
+
 const UserSchema = new mongoose.Schema({
   username: { type: String, required: true, unique: true },
   password: { type: String, required: true },
@@ -70,9 +71,10 @@ app.post('/api/favoriler', async (req, res) => {
   }
 });
 
-app.get('*', (req, res) => {
+app.get('/*', (req, res) => {
   res.sendFile(path.join(__dirname, 'index.html'));
 });
 
 const PORT = process.env.PORT || 3000;
+
 app.listen(PORT, () => console.log(`Sunucu ${PORT} portunda çalışıyor.`));
