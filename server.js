@@ -7,6 +7,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+// SİTENİN TASARIMINI YAYINLAMA KODU (Bu tek başına yeterli)
 app.use(express.static(__dirname));
 
 const MONGO_URI = "mongodb+srv://erinslyr:711Acar2641.@cluster0.1ulgvt3.mongodb.net/dizisec?retryWrites=true&w=majority";
@@ -14,7 +15,6 @@ const MONGO_URI = "mongodb+srv://erinslyr:711Acar2641.@cluster0.1ulgvt3.mongodb.
 mongoose.connect(MONGO_URI)
   .then(() => console.log("MongoDB'ye başarıyla bağlandı! 🚀"))
   .catch(err => console.log("MongoDB Bağlantı hatası:", err));
-
 
 const UserSchema = new mongoose.Schema({
   username: { type: String, required: true, unique: true },
@@ -71,10 +71,5 @@ app.post('/api/favoriler', async (req, res) => {
   }
 });
 
-app.get('/*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'index.html'));
-});
-
 const PORT = process.env.PORT || 3000;
-
 app.listen(PORT, () => console.log(`Sunucu ${PORT} portunda çalışıyor.`));
